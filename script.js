@@ -109,6 +109,7 @@ const CONSONANTS = {
 // Get the input and output elements
 const inputElement = document.getElementById("singlish-input");
 const outputElement = document.getElementById("unicode-output");
+const predictionArea = document.getElementById('prediction-area'); // Get the prediction area element
 
 // Function to find the longest matching key from a mapping
 const findLongestMatch = (text, mapping) => {
@@ -170,11 +171,144 @@ const convertToUnicode = (text) => {
   return output;
 };
 
+// Function to generate and display predictions
+const generatePredictions = (currentInput) => {
+    predictionArea.innerHTML = ''; // Clear previous predictions
+
+    if (currentInput.length === 0) {
+        return;
+    }
+
+    // Get the last "word" or incomplete sequence for prediction
+    const lastSpaceIndex = currentInput.lastIndexOf(' ');
+    const originalActiveInput = lastSpaceIndex !== -1 ? currentInput.substring(lastSpaceIndex + 1) : currentInput;
+    let activeInputForPrediction = originalActiveInput; // Use this for generating predictions
+
+    if (activeInputForPrediction.length === 0) {
+        return;
+    }
+
+    const predictions = [];
+    const addedPredictions = new Set(); // To store unique predictions (singlish form)
+
+    // Helper to add unique predictions
+    const addUniquePrediction = (singlish, unicode) => {
+        if (!addedPredictions.has(singlish)) {
+            predictions.push({ singlish, unicode });
+            addedPredictions.add(singlish);
+        }
+    };
+
+    // --- Attempt predictions with activeInputForPrediction ---
+    let foundPredictions = false;
+
+    // Generate predictions from CONSONANTS
+    for (const key in CONSONANTS) {
+        if (key.startsWith(activeInputForPrediction)) {
+            addUniquePrediction(key, CONSONANTS[key]);
+            foundPredictions = true;
+        }
+    }
+
+    // Generate predictions from VOWELS
+    for (const key in VOWELS) {
+        if (key.startsWith(activeInputForPrediction)) {
+            addUniquePrediction(key, VOWELS[key]);
+            foundPredictions = true;
+        }
+    }
+
+    // Generate predictions for Consonant + Vowel Modifier combinations
+    for (const consKey in CONSONANTS) {
+        for (const vowelKey in VOWEL_MODIFIERS) {
+            let combinedSinglish;
+            let combinedUnicode;
+
+            if (vowelKey === 'a') {
+                combinedSinglish = consKey + 'a';
+                combinedUnicode = CONSONANTS[consKey];
+            } else {
+                combinedSinglish = consKey + vowelKey;
+                combinedUnicode = CONSONANTS[consKey] + VOWEL_MODIFIERS[vowelKey];
+            }
+
+            if (combinedSinglish.startsWith(activeInputForPrediction)) {
+                addUniquePrediction(combinedSinglish, combinedUnicode);
+                foundPredictions = true;
+            }
+        }
+    }
+
+    // --- Fallback: If no predictions found with activeInputForPrediction, try with its last character ---
+    if (!foundPredictions && activeInputForPrediction.length > 0) {
+        const lastCharOfActiveInput = activeInputForPrediction[activeInputForPrediction.length - 1];
+        // Use the last character for fallback predictions
+        const fallbackInput = lastCharOfActiveInput;
+
+        // Generate predictions from CONSONANTS (starting with last char)
+        for (const key in CONSONANTS) {
+            if (key.startsWith(fallbackInput)) {
+                addUniquePrediction(key, CONSONANTS[key]);
+            }
+        }
+
+        // Generate predictions from VOWELS (starting with last char)
+        for (const key in VOWELS) {
+            if (key.startsWith(fallbackInput)) {
+                addUniquePrediction(key, VOWELS[key]);
+            }
+        }
+
+        // Generate predictions for Consonant + Vowel Modifier combinations (consonant part starting with last char)
+        for (const consKey in CONSONANTS) {
+            if (consKey.startsWith(fallbackInput)) { // Only if the consonant itself starts with the last char
+                for (const vowelKey in VOWEL_MODIFIERS) {
+                    let combinedSinglish;
+                    let combinedUnicode;
+
+                    if (vowelKey === 'a') {
+                        combinedSinglish = consKey + 'a';
+                        combinedUnicode = CONSONANTS[consKey];
+                    } else {
+                        combinedSinglish = consKey + vowelKey;
+                        combinedUnicode = CONSONANTS[consKey] + VOWEL_MODIFIERS[vowelKey];
+                    }
+                    // Only add if the combinedSinglish starts with the fallbackInput
+                    if (combinedSinglish.startsWith(fallbackInput)) {
+                        addUniquePrediction(combinedSinglish, combinedUnicode);
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Sort predictions for better user experience (e.g., alphabetically or by length)
+    predictions.sort((a, b) => a.singlish.localeCompare(b.singlish));
+
+
+    // Display predictions
+    predictions.forEach(p => {
+        const predictionItem = document.createElement('div');
+        predictionItem.classList.add('prediction-item');
+        predictionItem.textContent = `${p.singlish} -> ${p.unicode}`;
+        predictionItem.addEventListener('click', () => {
+            // Replace the last part of the input with the full prediction
+            const newInputValue = currentInput.substring(0, currentInput.length - originalActiveInput.length) + p.singlish;
+            inputElement.value = newInputValue;
+            inputElement.dispatchEvent(new Event('input')); // Trigger input event
+            inputElement.focus(); // Keep focus on the input
+        });
+        predictionArea.appendChild(predictionItem);
+    });
+};
+
 // Add an event listener to the input element
 inputElement.addEventListener("input", () => {
   const inputText = inputElement.value;
   const unicodeText = convertToUnicode(inputText);
   outputElement.textContent = unicodeText;
+  generatePredictions(inputText); // Call generatePredictions
 });
 
 const copyButton = document.getElementById("copy-button");
@@ -220,3 +354,6 @@ window.addEventListener('click', (event) => {
         helpModal.style.display = 'none';
     }
 });
+
+// Focus the input element when the page loads
+inputElement.focus();
