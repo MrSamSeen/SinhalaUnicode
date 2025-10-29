@@ -1,0 +1,219 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a; /* Dark background */
+    color: #e0e0e0; /* Light text */
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px; /* Add some padding around the content */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+.container {
+    background-color: #2c2c2c; /* Slightly lighter dark for container */
+    padding: 2.5rem; /* Increased padding */
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); /* Darker, more prominent shadow */
+    width: 90%;
+    max-width: 700px; /* Increased max-width */
+    margin-bottom: 20px; /* Space between container and footer */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem; /* Increased margin */
+    color: #4CAF50; /* Accent color for heading */
+    font-size: 2.2em; /* Larger heading */
+    font-weight: 600;
+}
+
+textarea {
+    width: 100%;
+    height: 180px; /* Increased height */
+    padding: 1.2rem; /* Increased padding */
+    border: 1px solid #444; /* Darker border */
+    border-radius: 8px; /* More rounded corners */
+    font-size: 1.1rem; /* Slightly larger font */
+    background-color: #3a3a3a; /* Dark background for textarea */
+    color: #e0e0e0; /* Light text */
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 1rem; /* Space below textarea */
+}
+
+textarea::placeholder {
+    color: #bbb; /* Lighter placeholder text */
+}
+
+#unicode-output {
+    margin-top: 1rem;
+    padding: 1.2rem; /* Increased padding */
+    border: 1px solid #444; /* Darker border */
+    border-radius: 8px; /* More rounded corners */
+    min-height: 180px; /* Increased min-height */
+    background-color: #3a3a3a; /* Dark background for output */
+    color: #e0e0e0; /* Light text */
+    font-size: 1.3rem; /* Larger font */
+    line-height: 1.6; /* Improved readability */
+    word-wrap: break-word; /* Ensure long words wrap */
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    margin-top: 1.5rem; /* Space above buttons */
+}
+
+button {
+    padding: 0.8rem 1.8rem; /* Increased padding */
+    border: none;
+    border-radius: 6px; /* Slightly more rounded */
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease; /* Smooth transitions */
+    margin-left: 1rem; /* Space between buttons */
+}
+
+#copy-button {
+    background-color: #4CAF50; /* Green accent */
+    color: #ffffff;
+}
+
+#copy-button:hover {
+    background-color: #43a047; /* Darker green on hover */
+    transform: translateY(-1px); /* Slight lift effect */
+}
+
+#clear-button {
+    background-color: #f44336; /* Red accent */
+    color: #ffffff;
+}
+
+#clear-button:hover {
+    background-color: #e53935; /* Darker red on hover */
+    transform: translateY(-1px);
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem; /* Increased padding */
+    margin-top: 30px; /* More space from container */
+    color: #888; /* Slightly lighter grey for footer text */
+    font-size: 0.9em;
+}
+
+footer a {
+    color: #4CAF50; /* Accent color for links */
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+#help-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    color: #4CAF50;
+    font-size: 1.2em;
+    border: 1px solid #4CAF50;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#help-icon:hover {
+    background-color: #4CAF50;
+    color: #1a1a1a;
+}
+
+/* Modal styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #2c2c2c;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #444;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+    position: relative;
+    color: #e0e0e0;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #e0e0e0;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    color: #4CAF50;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modal-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.modal-content ul li {
+    background-color: #3a3a3a;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-content ul li::before {
+    content: '•';
+    color: #4CAF50;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+.modal-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}

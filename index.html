@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinhala Singlish to Unicode Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sinhala Singlish to Unicode Converter <span id="help-icon" title="Click for help">?</span></h1>
+        <textarea id="singlish-input" placeholder="Type Singlish here..."></textarea>
+        <div id="unicode-output"></div>
+        <div class="button-group">
+            <button id="copy-button">Copy</button>
+            <button id="clear-button">Clear</button>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>How to Type Special Scenarios</h2>
+            <p>Here are some common Singlish to Sinhala Unicode mappings:</p>
+            <ul>
+                <li>`aa` for `ආ`</li>
+                <li>`ee` for `ඊ`</li>
+                <li>`oo` for `ඌ`</li>
+                <li>`ae` for `ඇ`</li>
+                <li>`nnd` for `ඬ`</li>
+                <li>`nng` for `ඟ`</li>
+                <li>`sh` for `ශ`</li>
+                <li>`th` for `ත`</li>
+                <li>`dh` for `ධ`</li>
+                <li>`ch` for `ච`</li>
+                <li>`kh` for `ඛ`</li>
+                <li>`gh` for `ඝ`</li>
+                <li>`jh` for `ඣ`</li>
+                <li>`ph` for `ඵ`</li>
+                <li>`bh` for `භ`</li>
+                <li>`x` for `ං` (bindu)</li>
+                <li>`N` for `ණ`</li>
+                <li>`L` for `ළ`</li>
+                <li>`K` for `ඛ`</li>
+                <li>`G` for `ඝ`</li>
+                <li>`C` for `ඡ`</li>
+                <li>`J` for `ඣ`</li>
+                <li>`T` for `ඨ`</li>
+                <li>`D` for `ඪ`</li>
+                <li>`P` for `ඵ`</li>
+                <li>`B` for `භ`</li>
+            </ul>
+            <p>For consonants followed by a vowel, simply type the consonant followed by the vowel (e.g., `ka` for `ක`, `ki` for `කි`).</p>
+            <p>For consonants without a following vowel, an 'al' sign (්) will be automatically added (e.g., `k` for `ක්`).</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <footer>
+        <p>Developed by Sam Seen | <a href="https://github.com/samseen" target="_blank">GitHub</a></p>
+    </footer>
+</body>
+</html>
