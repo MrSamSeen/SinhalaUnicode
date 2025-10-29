@@ -179,17 +179,16 @@ const generatePredictions = (currentInput) => {
         return;
     }
 
-    // Get the last "word" or incomplete sequence for prediction
     const lastSpaceIndex = currentInput.lastIndexOf(' ');
-    const originalActiveInput = lastSpaceIndex !== -1 ? currentInput.substring(lastSpaceIndex + 1) : currentInput;
-    let activeInputForPrediction = originalActiveInput; // Use this for generating predictions
+    const lastWord = lastSpaceIndex !== -1 ? currentInput.substring(lastSpaceIndex + 1) : currentInput;
 
-    if (activeInputForPrediction.length === 0) {
+    if (lastWord.length === 0) {
         return;
     }
 
-    const predictions = [];
-    const addedPredictions = new Set(); // To store unique predictions (singlish form)
+    let activeInputForPrediction = '';
+    let predictions = [];
+    const addedPredictions = new Set();
 
     // Helper to add unique predictions
     const addUniquePrediction = (singlish, unicode) => {
@@ -199,93 +198,80 @@ const generatePredictions = (currentInput) => {
         }
     };
 
-    // --- Attempt predictions with activeInputForPrediction ---
-    let foundPredictions = false;
+    // Iterate backwards from the longest possible suffix of the last word
+    // to find the most relevant activeInput for prediction
+    for (let len = Math.min(lastWord.length, 3); len >= 1; len--) {
+        const suffix = lastWord.substring(lastWord.length - len);
+        let currentSuffixPredictions = [];
+        const currentSuffixAdded = new Set();
 
-    // Generate predictions from CONSONANTS
-    for (const key in CONSONANTS) {
-        if (key.startsWith(activeInputForPrediction)) {
-            addUniquePrediction(key, CONSONANTS[key]);
-            foundPredictions = true;
-        }
-    }
-
-    // Generate predictions from VOWELS
-    for (const key in VOWELS) {
-        if (key.startsWith(activeInputForPrediction)) {
-            addUniquePrediction(key, VOWELS[key]);
-            foundPredictions = true;
-        }
-    }
-
-    // Generate predictions for Consonant + Vowel Modifier combinations
-    for (const consKey in CONSONANTS) {
-        for (const vowelKey in VOWEL_MODIFIERS) {
-            let combinedSinglish;
-            let combinedUnicode;
-
-            if (vowelKey === 'a') {
-                combinedSinglish = consKey + 'a';
-                combinedUnicode = CONSONANTS[consKey];
-            } else {
-                combinedSinglish = consKey + vowelKey;
-                combinedUnicode = CONSONANTS[consKey] + VOWEL_MODIFIERS[vowelKey];
-            }
-
-            if (combinedSinglish.startsWith(activeInputForPrediction)) {
-                addUniquePrediction(combinedSinglish, combinedUnicode);
-                foundPredictions = true;
-            }
-        }
-    }
-
-    // --- Fallback: If no predictions found with activeInputForPrediction, try with its last character ---
-    if (!foundPredictions && activeInputForPrediction.length > 0) {
-        const lastCharOfActiveInput = activeInputForPrediction[activeInputForPrediction.length - 1];
-        // Use the last character for fallback predictions
-        const fallbackInput = lastCharOfActiveInput;
-
-        // Generate predictions from CONSONANTS (starting with last char)
+        // Generate predictions for this suffix
+        // --- CONSONANTS ---
         for (const key in CONSONANTS) {
-            if (key.startsWith(fallbackInput)) {
-                addUniquePrediction(key, CONSONANTS[key]);
-            }
-        }
-
-        // Generate predictions from VOWELS (starting with last char)
-        for (const key in VOWELS) {
-            if (key.startsWith(fallbackInput)) {
-                addUniquePrediction(key, VOWELS[key]);
-            }
-        }
-
-        // Generate predictions for Consonant + Vowel Modifier combinations (consonant part starting with last char)
-        for (const consKey in CONSONANTS) {
-            if (consKey.startsWith(fallbackInput)) { // Only if the consonant itself starts with the last char
-                for (const vowelKey in VOWEL_MODIFIERS) {
-                    let combinedSinglish;
-                    let combinedUnicode;
-
-                    if (vowelKey === 'a') {
-                        combinedSinglish = consKey + 'a';
-                        combinedUnicode = CONSONANTS[consKey];
+            if (key.startsWith(suffix)) {
+                if (!currentSuffixAdded.has(key)) {
+                    // Special handling for 'x' (bindu) - it does not take an 'al' sign
+                    if (key === 'x') {
+                        currentSuffixPredictions.push({ singlish: key, unicode: CONSONANTS[key] });
                     } else {
-                        combinedSinglish = consKey + vowelKey;
-                        combinedUnicode = CONSONANTS[consKey] + VOWEL_MODIFIERS[vowelKey];
+                        currentSuffixPredictions.push({ singlish: key, unicode: CONSONANTS[key] + '්' });
                     }
-                    // Only add if the combinedSinglish starts with the fallbackInput
-                    if (combinedSinglish.startsWith(fallbackInput)) {
-                        addUniquePrediction(combinedSinglish, combinedUnicode);
+                    currentSuffixAdded.add(key);
+                }
+            }
+        }
+
+        // --- VOWELS ---
+        for (const key in VOWELS) {
+            if (key.startsWith(suffix)) {
+                if (!currentSuffixAdded.has(key)) {
+                    currentSuffixPredictions.push({ singlish: key, unicode: VOWELS[key] });
+                    currentSuffixAdded.add(key);
+                }
+            }
+        }
+
+        // --- Consonant + Vowel Modifier combinations ---
+        for (const consKey in CONSONANTS) {
+            // Exclude 'x' from consonant + vowel modifier combinations
+            if (consKey === 'x') continue;
+
+            for (const vowelKey in VOWEL_MODIFIERS) {
+                let combinedSinglish;
+                let combinedUnicode;
+
+                if (vowelKey === 'a') {
+                    combinedSinglish = consKey + 'a';
+                    combinedUnicode = CONSONANTS[consKey];
+                } else {
+                    combinedSinglish = consKey + vowelKey;
+                    combinedUnicode = CONSONANTS[consKey] + VOWEL_MODIFIERS[vowelKey];
+                }
+
+                if (combinedSinglish.startsWith(suffix)) {
+                    if (!currentSuffixAdded.has(combinedSinglish)) {
+                        currentSuffixPredictions.push({ singlish: combinedSinglish, unicode: combinedUnicode });
+                        currentSuffixAdded.add(combinedSinglish);
                     }
                 }
             }
         }
+
+        // If we found predictions for this suffix, use it as the activeInput and break
+        if (currentSuffixPredictions.length > 0) {
+            predictions = currentSuffixPredictions;
+            activeInputForPrediction = suffix;
+            break; // Found the longest relevant suffix, stop searching
+        }
     }
 
+    // If no predictions were found even for single characters, return
+    if (predictions.length === 0) {
+        return;
+    }
 
     // Sort predictions for better user experience (e.g., alphabetically or by length)
     predictions.sort((a, b) => a.singlish.localeCompare(b.singlish));
-
 
     // Display predictions
     predictions.forEach(p => {
@@ -293,8 +279,9 @@ const generatePredictions = (currentInput) => {
         predictionItem.classList.add('prediction-item');
         predictionItem.textContent = `${p.singlish} -> ${p.unicode}`;
         predictionItem.addEventListener('click', () => {
-            // Replace the last part of the input with the full prediction
-            const newInputValue = currentInput.substring(0, currentInput.length - originalActiveInput.length) + p.singlish;
+            // Replace the part of the input that was used for prediction
+            const startIndex = currentInput.length - activeInputForPrediction.length;
+            const newInputValue = currentInput.substring(0, startIndex) + p.singlish;
             inputElement.value = newInputValue;
             inputElement.dispatchEvent(new Event('input')); // Trigger input event
             inputElement.focus(); // Keep focus on the input
